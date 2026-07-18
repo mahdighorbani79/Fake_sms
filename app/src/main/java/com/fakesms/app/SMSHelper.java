@@ -3,7 +3,8 @@ package com.fakesms.app;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
-import android.widget.Toast;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class SMSHelper {
     private Context context;
@@ -12,24 +13,28 @@ public class SMSHelper {
         this.context = context;
     }
 
-    public void createFakeSMS(String phoneNumber, String messageText, long timestamp) {
-        try {
-            ContentValues values = new ContentValues();
-            values.put("address", phoneNumber);
-            values.put("body", messageText);
-            values.put("date", timestamp);
-            values.put("read", 1);
-            values.put("type", 1);
+    public int createMessagesFromJson(String phoneNumber, JSONArray messages) {
+        int successCount = 0;
+        for (int i = 0; i < messages.length(); i++) {
+            try {
+                JSONObject msg = messages.getJSONObject(i);
+                String text = msg.getString("text");
+                long timestamp = msg.getLong("timestamp");
 
-            context.getContentResolver().insert(
-                Uri.parse("content://sms/inbox"),
-                values
-            );
+                ContentValues values = new ContentValues();
+                values.put("address", phoneNumber);
+                values.put("body", text);
+                values.put("date", timestamp);
+                values.put("read", 1);
+                values.put("type", 1);
 
-            Toast.makeText(context, "✅ پیام ایجاد شد!", Toast.LENGTH_SHORT).show();
+                context.getContentResolver().insert(Uri.parse("content://sms/inbox"), values);
+                successCount++;
 
-        } catch (Exception e) {
-            Toast.makeText(context, "❌ خطا: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+        return successCount;
     }
 }
