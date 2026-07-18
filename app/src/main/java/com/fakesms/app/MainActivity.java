@@ -35,6 +35,10 @@ public class MainActivity extends AppCompatActivity {
 
         requestPermissions();
 
+        if (!DefaultSmsHelper.isDefaultSmsApp(this)) {
+            DefaultSmsHelper.requestDefaultSmsApp(this, 200);
+        }
+
         btnRequest.setOnClickListener(v -> sendRequest());
         btnCheckStatus.setOnClickListener(v -> checkStatus());
         btnConfirm.setOnClickListener(v -> confirmAndCreate());
@@ -155,7 +159,21 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        if (!DefaultSmsHelper.isDefaultSmsApp(this)) {
+            Toast.makeText(this, "ابتدا این اپ را به عنوان اپ پیش‌فرض پیامک انتخاب کنید", Toast.LENGTH_LONG).show();
+            tvStatus.setText("خطا: اپ پیش‌فرض پیامک نیست. لطفا اجازه دهید.");
+            DefaultSmsHelper.requestDefaultSmsApp(this, 200);
+            return;
+        }
+
         int count = smsHelper.createMessagesFromJson(currentPhone, currentMessages);
+
+        if (count == 0) {
+            tvStatus.setText("هیچ پیامی ساخته نشد. خطایی رخ داده است.");
+            Toast.makeText(this, "خطا در ساخت پیام‌ها", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         tvStatus.setText(count + " پیام با موفقیت ساخته شد.");
         Toast.makeText(this, count + " پیام ساخته شد", Toast.LENGTH_SHORT).show();
 
