@@ -44,10 +44,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void requestPermissions() {
         String[] perms = {
-                Manifest.permission.READ_SMS,
-                Manifest.permission.WRITE_SMS,
-                Manifest.permission.SEND_SMS,
-                Manifest.permission.RECEIVE_SMS
+                "android.permission.READ_SMS",
+                "android.permission.WRITE_SMS",
+                "android.permission.SEND_SMS",
+                "android.permission.RECEIVE_SMS"
         };
         boolean needRequest = false;
         for (String p : perms) {
