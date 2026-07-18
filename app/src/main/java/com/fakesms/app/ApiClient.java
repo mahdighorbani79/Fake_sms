@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class ApiClient {
 
@@ -15,7 +16,7 @@ public class ApiClient {
         void onError(String error);
     }
 
-    public static void post(String endpoint, ApiCallback callback) {
+    public static void post(String endpoint, String jsonBody, ApiCallback callback) {
         new Thread(() -> {
             try {
                 URL url = new URL(BASE_URL + endpoint);
@@ -24,18 +25,19 @@ public class ApiClient {
                 conn.setDoOutput(true);
                 conn.setConnectTimeout(10000);
                 conn.setReadTimeout(10000);
+                conn.setRequestProperty("Content-Type", "application/json; utf-8");
 
                 OutputStream os = conn.getOutputStream();
-                os.write("{}".getBytes());
+                os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
                 os.flush();
                 os.close();
 
                 int code = conn.getResponseCode();
                 BufferedReader reader;
                 if (code >= 200 && code < 300) {
-                    reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
                 } else {
-                    reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                    reader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8));
                 }
 
                 StringBuilder sb = new StringBuilder();
@@ -45,7 +47,11 @@ public class ApiClient {
                 }
                 reader.close();
 
-                callback.onSuccess(sb.toString());
+                if (code >= 200 && code < 300) {
+                    callback.onSuccess(sb.toString());
+                } else {
+                    callback.onError("HTTP " + code + ": " + sb.toString());
+                }
 
             } catch (Exception e) {
                 callback.onError(e.getMessage());
@@ -65,9 +71,9 @@ public class ApiClient {
                 int code = conn.getResponseCode();
                 BufferedReader reader;
                 if (code >= 200 && code < 300) {
-                    reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
                 } else {
-                    reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                    reader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8));
                 }
 
                 StringBuilder sb = new StringBuilder();
@@ -77,7 +83,11 @@ public class ApiClient {
                 }
                 reader.close();
 
-                callback.onSuccess(sb.toString());
+                if (code >= 200 && code < 300) {
+                    callback.onSuccess(sb.toString());
+                } else {
+                    callback.onError("HTTP " + code + ": " + sb.toString());
+                }
 
             } catch (Exception e) {
                 callback.onError(e.getMessage());

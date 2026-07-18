@@ -1,6 +1,7 @@
 package com.fakesms.app;
 
 import android.app.Activity;
+import android.app.role.RoleManager;
 import android.content.Intent;
 import android.os.Build;
 import android.provider.Telephony;
@@ -13,6 +14,15 @@ public class DefaultSmsHelper {
     }
 
     public static void requestDefaultSmsApp(Activity activity, int requestCode) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            RoleManager roleManager = (RoleManager) activity.getSystemService(android.content.Context.ROLE_SERVICE);
+            if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
+                Intent intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_SMS);
+                activity.startActivityForResult(intent, requestCode);
+                return;
+            }
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
             intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, activity.getPackageName());
