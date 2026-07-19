@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 public class ApiClient {
 
-    private static final String BASE_URL = "http://82.39.154.21:5000";
+    private static final String BASE_URL = "http://91.124.209.233:5000";
 
     public interface ApiCallback {
         void onSuccess(String response);
